@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import Capacitor
 
 /**
@@ -10,10 +11,10 @@ public class KeepAwakePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "KeepAwakePlugin"
     public let jsName = "KeepAwake"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "keepAwake", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "allowSleep", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "isSupported", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "isKeptAwake", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "keepAwake", returnType: .promise),
+        CAPPluginMethod(name: "allowSleep", returnType: .promise),
+        CAPPluginMethod(name: "isSupported", returnType: .promise),
+        CAPPluginMethod(name: "isKeptAwake", returnType: .promise)
     ]
 
     @objc func keepAwake(_ call: CAPPluginCall) {
