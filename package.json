@@ -1,6 +1,6 @@
 {
   "name": "@capacitor-community/keep-awake",
-  "version": "8.0.1",
+  "version": "9.0.0",
   "description": "Prevent your screen from getting some sleep!",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -65,7 +65,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@capacitor/core": ">=8.0.0"
+    "@capacitor/core": ">=9.0.0"
   },
   "prettier": "@ionic/prettier-config",
   "swiftlint": "@ionic/swiftlint-config",
