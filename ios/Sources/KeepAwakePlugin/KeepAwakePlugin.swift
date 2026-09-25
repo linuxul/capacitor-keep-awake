@@ -11,13 +11,16 @@ public class KeepAwakePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "KeepAwakePlugin"
     public let jsName = "KeepAwake"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "keepAwake", returnType: .promise),
-        CAPPluginMethod(name: "allowSleep", returnType: .promise),
-        CAPPluginMethod(name: "isSupported", returnType: .promise),
-        CAPPluginMethod(name: "isKeptAwake", returnType: .promise)
+        .promise("keepAwake", KeepAwakePlugin.keepAwake),
+        .promise("allowSleep", KeepAwakePlugin.allowSleep),
+        .promise("isSupported", KeepAwakePlugin.isSupported),
+        .async("isKeptAwake", KeepAwakePlugin.isKeptAwake)
     ]
 
-    @objc func keepAwake(_ call: CAPPluginCall) {
+    // keepAwake and allowSleep stay synchronous: the bridge queue runs them in the order of the calls and each hands
+    // its UIKit work to the main queue in that order, so the last call wins. Async methods would not keep that order.
+
+    func keepAwake(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             if !UIApplication.shared.isIdleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
@@ -26,7 +29,7 @@ public class KeepAwakePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    @objc func allowSleep(_ call: CAPPluginCall) {
+    func allowSleep(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             if UIApplication.shared.isIdleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = false
@@ -35,17 +38,18 @@ public class KeepAwakePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    @objc func isSupported(_ call: CAPPluginCall) {
+    func isSupported(_ call: CAPPluginCall) {
         call.resolve([
             "isSupported": true
         ])
     }
 
-    @objc func isKeptAwake(_ call: CAPPluginCall) {
-        DispatchQueue.main.async {
-            call.resolve([
-                "isKeptAwake": UIApplication.shared.isIdleTimerDisabled
-            ])
-        }
+    /// The idle timer is UIKit state: the method runs on the main actor. It starts after the UIKit work of the
+    /// keepAwake and allowSleep calls made before it, which was queued on the main queue first.
+    @MainActor
+    func isKeptAwake(_ call: CAPPluginCall) async -> JSObject {
+        return [
+            "isKeptAwake": UIApplication.shared.isIdleTimerDisabled
+        ]
     }
 }

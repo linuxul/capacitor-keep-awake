@@ -1,15 +1,24 @@
 import XCTest
+import Capacitor
 @testable import KeepAwakePlugin
 
-class KeepAwakeTests: XCTestCase {
-    func testEcho() {
-        // This is an example of a functional test case for a plugin.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+final class KeepAwakeTests: XCTestCase {
+    func testMethodsAreRegisteredAsPromises() {
+        let methods = KeepAwakePlugin().pluginMethods
+        XCTAssertEqual(methods.map(\.name), ["keepAwake", "allowSleep", "isSupported", "isKeptAwake"])
+        XCTAssertTrue(methods.allSatisfy { $0.returnType == .promise })
+    }
 
-        let implementation = KeepAwake()
-        let value = "Hello, World!"
-        let result = implementation.echo(value)
+    func testIsSupportedResolvesTrue() throws {
+        var resolved: PluginCallResultData?
+        let call = CAPPluginCall(callbackId: "test", methodName: "isSupported", options: [:], success: { result, _ in
+            resolved = result.data
+        }, error: { _ in
+            XCTFail("isSupported never rejects")
+        })
 
-        XCTAssertEqual(value, result)
+        KeepAwakePlugin().isSupported(call)
+
+        XCTAssertEqual(try XCTUnwrap(resolved)["isSupported"] as? Bool, true)
     }
 }
